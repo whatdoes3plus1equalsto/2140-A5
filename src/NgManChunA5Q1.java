@@ -10,13 +10,16 @@
  * PURPOSE:     Building a hospital ER simulation by reading patients.txt
  */
 import java.util.Scanner;
+
+import javax.naming.PartialResultException;
+
 import java.io.*;
 
 public class NgManChunA5Q1 {
     public static void main(String[] args) throws Exception {
         // application
         int clock = 0;
-        boolean docAva = true;
+        int docAvaTime = 0;
         int nextID = 1;
         String file = "patients.txt";
         try {
@@ -30,10 +33,18 @@ public class NgManChunA5Q1 {
             while (line != null) { // until EOF
                 sc = new Scanner(line);
                 arrival = sc.nextInt();
+                if (docAvaTime <= clock) {
+                    System.out.println("Doctor is available at time = " + clock);
+                }
+                clock = arrival;
                 pat = new Patient(nextID++, sc.nextInt(), sc.nextInt());
-                pq.insert(pat);
-                System.out.println("Patient " + pat.getID() + " arrived at time = " + arrival + " " + pat.toString());
+                pq.insert(pat, arrival);
                 line = br.readLine();
+            }
+            while (!pq.isEmpty()) {
+                pat = pq.deleteMax();
+                System.out.println(
+                        "Patient " + pat.getID() + " in for treatment at time = " + clock + " " + pat.toString());
             }
             sc.close();
             br.close();
@@ -89,23 +100,109 @@ class Node {
 class PriorityQueue {
     // PriorityQueue class
     // Max heap
+    private Patient[] heap; // the heap
+    private int heapSize; // number of patients queueing
+
     public PriorityQueue() {
         // constructor
+        // initialize the heap
+        heap = new Patient[50];
+        heapSize = 0;
     }
 
-    public void insert(Patient pat) {
+    public void insert(Patient pat, int arrival) {
+        // insert a patient to the maxheap
+        if (heapSize >= heap.length - 1) {
+            // double the heap size
+            doubleArraySize();
+        }
+        // insert
+        heap[heapSize] = pat;
+        heapSize++;
+        // remap the heap
+        siftUp(heapSize - 1);
 
+        System.out.println("Patient " + pat.getID() + " arrived at time = " + arrival + " " + pat.toString());
     }
 
     public Patient deleteMax() {
-        return null;
+        // return the top of the heap or remap the heap
+        if (!isEmpty()) {
+            Patient max = heap[0];
+            heap[0] = heap[--heapSize];
+            siftDown(0);
+            return max;
+        } else {
+            return null;
+        }
     }
 
     public Patient peek() {
-        return null;
+        // return the head of the heap
+        if (isEmpty()) {
+            return null;
+        } else {
+            return heap[0];
+        }
     }
 
     public boolean isEmpty() {
-        return true;
+        return heapSize == 0;
+    }
+
+    private void doubleArraySize() {
+        // helper method to double the array size
+        Patient[] temp = new Patient[heap.length];
+        System.arraycopy(heap, 0, temp, 0, heap.length);
+        heap = new Patient[heap.length * 2];
+        System.arraycopy(temp, 0, heap, 0, temp.length);
+    }
+
+    private int parent(int child) {
+        // return the index of its parent
+        return (child - 1) / 2;
+    }
+
+    private int rightChild(int parent) {
+        // return the index of the right child
+        return 2 * parent + 2;
+    }
+
+    private int leftChild(int parent) {
+        // return the index of the left child
+        return 2 * parent + 1;
+    }
+
+    private void siftUp(int index) {
+        // healper method to sift up
+        Patient toSift = heap[index];
+        int i = index;
+        int parent = parent(index);
+
+        while (i > 0 && heap[parent].getUR() < toSift.getUR()) {
+            heap[i] = heap[parent]; // move the "hole" up to the parent
+            i = parent;
+            parent = parent(i);
+        } // end while
+        heap[i] = toSift; // put the sifted item into the correct position
+    }
+
+    private void siftDown(int index) {
+        // helper method to sift down
+        int left = leftChild(index);
+        int right = rightChild(index);
+        int toSift;
+        if (right < heapSize && heap[right].getUR() > heap[left].getUR()) {
+            toSift = right;
+        } else {
+            toSift = left;
+        }
+
+        if (toSift < heapSize && heap[toSift].getUR() > heap[index].getUR()) {
+            Patient temp = heap[index];
+            heap[index] = heap[toSift];
+            heap[toSift] = temp;
+            siftDown(toSift);
+        }
     }
 }// end of PriorityQueue
