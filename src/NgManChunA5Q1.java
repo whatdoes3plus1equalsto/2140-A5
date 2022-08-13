@@ -10,42 +10,75 @@
  * PURPOSE:     Building a hospital ER simulation by reading patients.txt
  */
 import java.util.Scanner;
-
-import javax.naming.PartialResultException;
-
 import java.io.*;
 
 public class NgManChunA5Q1 {
     public static void main(String[] args) throws Exception {
         // application
-        int clock = 0;
-        int docAvaTime = 0;
-        int nextID = 1;
-        String file = "patients.txt";
+        int clock = 0; // current time
+        int docAvaTime = 0; // doctor available time
+        int nextID = 1; // ID to-give
+        String file = "patients.txt"; // file name
         try {
             FileReader fr = new FileReader(file);
             BufferedReader br = new BufferedReader(fr); // wrapping
-            String line = br.readLine();
+            String line = br.readLine(); // read line
             Scanner sc = new Scanner(line);
-            PriorityQueue pq = new PriorityQueue();
-            Patient pat;
-            int arrival = 0;
+            PriorityQueue pq = new PriorityQueue(); // initialize priority queue
+            Patient pat; // temp patient
+            int arrival = 0; // patient arrival time
             while (line != null) { // until EOF
                 sc = new Scanner(line);
                 arrival = sc.nextInt();
-                if (docAvaTime <= clock) {
-                    System.out.println("Doctor is available at time = " + clock);
+                if (docAvaTime <= arrival) {
+                    // if the doctor is free during the time
+                    while (!pq.isEmpty() && clock <= arrival) {
+                        // if the queue is not empty and can be reached
+                        System.out.println("Doctor is available at time = " + docAvaTime);
+                        clock = docAvaTime; // refresh the time
+                        pat = pq.deleteMax(); // dequeue the top patient
+                        System.out.println(
+                                "Patient " + pat.getID() + " in for treatment at time = " + clock + " "
+                                        + pat.toString());
+                        clock += pat.getTime(); // refresh the clock
+                        docAvaTime = clock; // refresh the doctor available time
+                    }
+                    if (docAvaTime <= arrival) {
+                        // if the treatment is done before the next patient arrive
+                        System.out.println("Doctor is available at time = " + docAvaTime);
+                    }
                 }
-                clock = arrival;
-                pat = new Patient(nextID++, sc.nextInt(), sc.nextInt());
-                pq.insert(pat, arrival);
-                line = br.readLine();
+                clock = arrival; // refresh the clock
+                pat = new Patient(nextID++, sc.nextInt(), sc.nextInt()); // initialize the patient
+                pq.insert(pat, arrival); // insert the patient into the queue
+                if (docAvaTime <= clock && pq.peek().equals(pat)) {
+                    // if the patient is the last one the queue
+                    System.out.println("Doctor is available at time = " + clock);
+                    pat = pq.deleteMax(); // dequeue
+                    System.out.println(
+                            "Patient " + pat.getID() + " in for treatment at time = " + clock + " "
+                                    + pat.toString());
+                    docAvaTime = clock + pat.getTime(); // refresh the doctor available time
+                }
+                line = br.readLine(); // next line
             }
-            while (!pq.isEmpty()) {
-                pat = pq.deleteMax();
-                System.out.println(
-                        "Patient " + pat.getID() + " in for treatment at time = " + clock + " " + pat.toString());
+
+            if (!pq.isEmpty()) {
+                // if the queue is not done yet
+                clock = docAvaTime;
+                while (!pq.isEmpty()) {
+                    // treat every patient leftover
+                    System.out.println("Doctor is available at time = " + docAvaTime);
+                    pat = pq.deleteMax(); // dequeue
+                    System.out.println(
+                            "Patient " + pat.getID() + " in for treatment at time = " + clock + " " + pat.toString());
+                    clock += pat.getTime(); // refresh the clock
+                    docAvaTime = clock; // refresh the doctor available time
+                }
             }
+            // where every patients is treated
+            System.out.println("Doctor is available at time = " + docAvaTime);
+
             sc.close();
             br.close();
             fr.close();
@@ -54,6 +87,7 @@ public class NgManChunA5Q1 {
             e.printStackTrace();
             System.out.println("\nPlease make sure the file exist and try again.");
         }
+        System.out.println("End of Processing.");
     }
 
 }// end of NgManChunA5Q1
@@ -91,11 +125,6 @@ class Patient {
         return time;
     }
 }// end of Patient class
-
-class Node {
-    // Node class
-
-}// end of Node class
 
 class PriorityQueue {
     // PriorityQueue class
