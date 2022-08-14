@@ -207,15 +207,15 @@ class PriorityQueue {
     private void siftUp(int index) {
         // healper method to sift up
         Patient toSift = heap[index];
-        int i = index;
-        int parent = parent(index);
+        int temp = index;
+        int tempParent = parent(index);
 
-        while (i > 0 && heap[parent].getUR() < toSift.getUR()) {
-            heap[i] = heap[parent]; // move the "hole" up to the parent
-            i = parent;
-            parent = parent(i);
-        } // end while
-        heap[i] = toSift; // put the sifted item into the correct position
+        while (temp > 0 && heap[tempParent].getUR() < toSift.getUR()) {
+            heap[temp] = heap[tempParent];
+            temp = tempParent;
+            tempParent = parent(temp);
+        }
+        heap[temp] = toSift;
     }
 
     private void siftDown(int index) {
