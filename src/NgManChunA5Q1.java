@@ -38,8 +38,8 @@ public class NgManChunA5Q1 {
                         clock = docAvaTime; // refresh the time
                         pat = pq.deleteMax(); // dequeue the top patient
                         System.out.println(
-                                "Patient " + pat.getID() + " in for treatment at time = " + clock + " "
-                                        + pat.toString());
+                                "Patient " + pat.getID() + " in for treatment at time = " + clock + " with urgency = "
+                                        + pat.getUR() + " and treatment time = " + pat.getTime() + ".");
                         clock += pat.getTime(); // refresh the clock
                         docAvaTime = clock; // refresh the doctor available time
                     }
@@ -56,8 +56,8 @@ public class NgManChunA5Q1 {
                     System.out.println("Doctor is available at time = " + clock);
                     pat = pq.deleteMax(); // dequeue
                     System.out.println(
-                            "Patient " + pat.getID() + " in for treatment at time = " + clock + " "
-                                    + pat.toString());
+                            "Patient " + pat.getID() + " in for treatment at time = " + clock + " with urgency = "
+                                    + pat.getUR() + " and treatment time = " + pat.getTime() + ".");
                     docAvaTime = clock + pat.getTime(); // refresh the doctor available time
                 }
                 line = br.readLine(); // next line
@@ -71,7 +71,8 @@ public class NgManChunA5Q1 {
                     System.out.println("Doctor is available at time = " + docAvaTime);
                     pat = pq.deleteMax(); // dequeue
                     System.out.println(
-                            "Patient " + pat.getID() + " in for treatment at time = " + clock + " " + pat.toString());
+                            "Patient " + pat.getID() + " in for treatment at time = " + clock + " with urgency = "
+                                    + pat.getUR() + " and treatment time = " + pat.getTime() + ".");
                     clock += pat.getTime(); // refresh the clock
                     docAvaTime = clock; // refresh the doctor available time
                 }
@@ -108,7 +109,7 @@ class Patient {
 
     public String toString() {
         // toString
-        return "with urgency = " + urgency + " and treatment time = " + time + ".";
+        return "Patient ID: " + id + " Urgency: " + urgency + " Treatment time: " + time;
     }
 
     // getter//
@@ -151,7 +152,8 @@ class PriorityQueue {
         // remap the heap
         siftUp(heapSize - 1);
 
-        System.out.println("Patient " + pat.getID() + " arrived at time = " + arrival + " " + pat.toString());
+        System.out.println("Patient " + pat.getID() + " arrived at time = " + arrival + " with urgency = "
+                + pat.getUR() + " and treatment time = " + pat.getTime() + ".");
     }
 
     public Patient deleteMax() {
